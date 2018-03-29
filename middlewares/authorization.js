@@ -1,10 +1,9 @@
 'use strict';
 
 const jwt = require('jsonwebtoken');
-const secretKeyCheck = require('../helpers/constants').secretKeyCheck;
+const secretKeyCheck = require('../helpers/constants').secretKeyAuth;
 
-
-exports.tokenEnterpriseCheck = function(req, res, next) {
+exports.tokenEnterpriseAuth = function(req, res, next) {
 
     const token = req.query.token;
     if (!token) {
@@ -30,7 +29,7 @@ exports.tokenEnterpriseCheck = function(req, res, next) {
 };
 
 
-exports.tokenUserCheck = function(req, res, next) {
+exports.tokenUserAuth = function(req, res, next) {
 
     const token = req.query.token;
     if (!token) {

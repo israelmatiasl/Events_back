@@ -4,6 +4,7 @@ const Enterprise = require('../models/enterprise');
 const bcrypt = require('bcryptjs');
 //const mongoosePagination = require('mongoose-pagination');
 const jwtCheck = require('../services/jwt_check');
+const jwtAuth = require('../services/jwt_authorization');
 
 function index(req, res){
     return res.status(200).send({
@@ -11,7 +12,53 @@ function index(req, res){
         message: 'from enterprises_Controller!!'
     });
 }
+//=====================================================
+// ENTERPRISE LOGIN ===================================
+//=====================================================
+function loginEnterprise(req, res){
 
+    const params = req.body;
+    const email = params.email;
+    const password = params.password;
+
+    Enterprise.findOne({email: email, check: 'VERIFIED', status: 'ACTIVE'}).exec((err, foundEnterprise) => {
+        if(err) {
+            return res.status(500).send({
+                ok: false,
+                message: 'An error occurred while searching for the company',
+                errors : err
+            });
+        }
+
+        if(!foundEnterprise) {
+            return res.status(404).send({
+                ok:false,
+                message: 'The company-email is not registered'
+            });
+        }
+
+        if(!bcrypt.compareSync(password, foundEnterprise.password)) {
+            return res.status(404).send({
+                ok:false,
+                message: 'The company-password is not registered'
+            });
+        }
+        else {
+            foundEnterprise.password = undefined;
+            let token = jwtAuth.createEnterpriseAuthToken(foundEnterprise);
+
+            return res.status(200).send({
+                ok:true,
+                enterprise: foundEnterprise,
+                token
+            });
+        }
+    });
+}
+
+//=====================================================
+// ENTERPRISE REGISTER ================================
+//=====================================================
 function registerEnterprise(req, res) {
 
     const params = req.body;
@@ -30,7 +77,7 @@ function registerEnterprise(req, res) {
 
     enterprise.save((err, enterpriseStored) => {
         if (err) {
-            return res.status(400).send({
+            return res.status(500).send({
                 ok: false,
                 message: 'An error occurred while trying to register the company',
                 errors: err
@@ -47,6 +94,10 @@ function registerEnterprise(req, res) {
     });
 }
 
+
+//=====================================================
+// ENTERPRISE ACTIVATE ACCOUNT ========================
+//=====================================================
 function activateEnterpriseAccount(req, res) {
 
     const enterpriseIdentified = req.enterprise;
@@ -63,13 +114,14 @@ function activateEnterpriseAccount(req, res) {
         }
 
         if (!foundEnterprise) {
-            return res.status(400).send({
+            return res.status(404).send({
                 ok: false,
                 message: 'The company is not registered'
             });
         }
 
         foundEnterprise.check = 'VERIFIED';
+        foundEnterprise.status = 'ACTIVE';
         foundEnterprise.save((err, enterpriseUpdated) => {
             if (err) {
                 return res.status(500).send({
@@ -78,7 +130,7 @@ function activateEnterpriseAccount(req, res) {
                     errors: err
                 });
             }
-
+            enterpriseUpdated.password = undefined;
             return res.status(200).send({
                 enterpriseUpdated
             });
@@ -86,8 +138,10 @@ function activateEnterpriseAccount(req, res) {
     });
 }
 
+
 module.exports = {
     index,
     registerEnterprise,
-    activateEnterpriseAccount
+    activateEnterpriseAccount,
+    loginEnterprise
 };

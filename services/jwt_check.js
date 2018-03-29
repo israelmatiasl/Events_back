@@ -2,7 +2,7 @@
 
 const jwt = require('jsonwebtoken');
 const secretKeyCheck = require('../helpers/constants').secretKeyCheck;
-const expiredTime = 7200; //seconds
+const expiredTime = 14400; //seconds
 
 exports.createEnterpriseCheckToken = function(enterprise) {
     return jwt.sign({ enterprise: enterprise }, secretKeyCheck, { expiresIn: expiredTime });

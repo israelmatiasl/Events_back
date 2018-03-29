@@ -30,7 +30,7 @@ var enterpriseSchema = new Schema({
     email: { type: String, unique: true, required: [true, 'email is necessary'] },
     password: { type: String, required: [true, 'password is necessary'] },
     check: { type: String, required: true, default: 'NOT_VERIFIED', enum: validCheck },
-    status: { type: String, required: true, default: 'ACTIVE', enum: validStatus },
+    status: { type: String, required: true, default: 'INACTIVE', enum: validStatus },
     created_at: { type: Date, required: true, default: Date.now },
     updated_at: { type: Date, required: false }
 });
