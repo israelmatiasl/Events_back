@@ -32,7 +32,8 @@ var enterpriseSchema = new Schema({
     check: { type: String, required: true, default: 'NOT_VERIFIED', enum: validCheck },
     status: { type: String, required: true, default: 'INACTIVE', enum: validStatus },
     created_at: { type: Date, required: true, default: Date.now },
-    updated_at: { type: Date, required: false }
+    updated_at: { type: Date, required: false },
+    activated_at: { type: Date, required: false }
 });
 
 enterpriseSchema.plugin(uniqueValidator, { message: '{PATH} must be unique' });

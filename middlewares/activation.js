@@ -1,19 +1,20 @@
 'use strict';
 
 const jwt = require('jsonwebtoken');
-const secretKeyCheck = require('../helpers/constants').secretKeyAuth;
+const secretKeyActivate = require('../helpers/constants').secretKeyActivate;
 
-exports.tokenEnterpriseAuth = function(req, res, next) {
 
-    const token = req.headers.auth;
+exports.tokenEnterpriseActivate = function(req, res, next) {
+
+    const token = req.query.token;
     if (!token) {
         return res.status(403).send({
             ok: false,
-            message: 'Enterprise authentication does not has a valid token'
+            message: 'Enterprise account verification does not has a valid token'
         });
     }
 
-    jwt.verify(token, secretKeyCheck, (err, enterpriseDecoded) => {
+    jwt.verify(token, secretKeyActivate, (err, enterpriseDecoded) => {
 
         if (err) {
             return res.status(401).send({
@@ -29,17 +30,17 @@ exports.tokenEnterpriseAuth = function(req, res, next) {
 };
 
 
-exports.tokenUserAuth = function(req, res, next) {
+exports.tokenUserActivate = function(req, res, next) {
 
-    const token = req.headers.auth;
+    const token = req.query.token;
     if (!token) {
         return res.status(403).send({
             ok: false,
-            message: 'User authentication does not has a valid token'
+            message: 'User account verification does not has a valid token'
         });
     }
 
-    jwt.verify(token, secretKeyCheck, (err, userDecoded) => {
+    jwt.verify(token, secretKeyActivate, (err, userDecoded) => {
 
         if (err) {
             return res.status(401).send({
