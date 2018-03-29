@@ -8,6 +8,11 @@ const validType = {
     message: '{VALUE} is not a valid event type'
 };
 
+const validStatus = {
+    values: ['ACTIVE', 'INACTIVE', 'DELETED'],
+    message: '{VALUE} is not a valid event status'
+};
+
 var eventSchema = new Schema({
     enterprise: { type: Schema.Types.ObjectId, ref: 'Enterprise', required: [true, 'enterprise is necessary'] },
     event_name: { type: String, required: [true, 'event_name is necessary'] },
@@ -17,6 +22,7 @@ var eventSchema = new Schema({
     location: { type: String, required: [true, 'location is necessary'] },
     capacity: { type: Number, required: false }, //Just update when is private event and after the purchase
     price: { type: String, required: false }, //Just when is public event and has a price
+    status: { type: String, required: true, default: 'INACTIVE'},
     created_at: { type: Date, required: true, default: Date.now },
     updated_at: { type: Date, required: false }
 });
