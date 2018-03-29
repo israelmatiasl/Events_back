@@ -1,53 +1,165 @@
 'use strict';
 
 const Event = require('../models/event');
+const Assistants = require('../models/assistants');
 //const Enterprise = require('../models/enterprise');
-//const mongoosePagination = require('mongoose-pagination');
+const mongoosePagination = require('mongoose-pagination');
+const itemsPerPage = require('../helpers/constants').itemsPerPage;
 
 //=====================================================
-// GET PRIVATE EVENTS (ENTERPRISE) ====================
+// GET EVENTS PUBLIC AND PRIVATE (ENTERPRISE) =========
 //=====================================================
-function privateEvents_Enterprise(req, res){
+function eventsEnterprise(req, res){
 
     const enterprise = req.enterprise; // obtained from token
+    const enterpriseId = enterprise._id;
 
-    Event.find({enterprise: enterprise._id, event_type: 'PRIVATE' }).exec((err, events)=>{
-        if(err){
-            return res.status(500).send({
+    const type = req.query.type.toUpperCase();
+    let page = 1;
+    if(req.query.page){
+        page = req.query.page;
+    }
+
+    let promise;
+    switch (type){
+        case 'PRIVATE':
+            promise = privateEvents('enterprise', enterpriseId, page);
+            break;
+        case 'PUBLIC':
+            promise = publicEvents('enterprise', enterpriseId, page);
+            break;
+        default:
+            return res.status(400).send({
                 ok:false,
-                message: 'An error occurred while searching for the events',
-                errors : err
+                message: 'invalid type'
             });
-        }
+    }
 
+    promise.then((value)=>{
+       return res.status(200).send({
+           ok:true,
+           events: value
+       });
+    });
+}
+
+
+//=====================================================
+// GET EVENTS PUBLIC AND PRIVATE (USER) ===============
+//=====================================================
+function eventsUser(req, res){
+
+    const user = req.user; // obtained from token
+    const userId = user._id;
+
+    const type = req.query.type.toUpperCase();
+    let page = 1;
+    if(req.query.page){
+        page = req.query.page;
+    }
+
+    let promise;
+    switch (type){
+        case 'PRIVATE':
+            promise = privateEvents('user', userId, page);
+            break;
+        case 'PUBLIC':
+            promise = publicEvents('user', userId, page);
+            break;
+        default:
+            return res.status(400).send({
+                ok:false,
+                message: 'invalid type'
+            });
+    }
+
+    promise.then((value)=>{
         return res.status(200).send({
-           ok: true,
-           events
+            ok:true,
+            events: value
         });
     });
 }
 
-//=====================================================
-// GET PUBLIC EVENTS (ENTERPRISE) =====================
-//=====================================================
-function publicEvents_Enterprise(req, res){
 
-    const enterprise = req.enterprise; // obtained from token
-
-    Event.find({enterprise: enterprise._id, event_type: 'PUBLIC' }).exec((err, events)=>{
-        if(err){
-            return res.status(500).send({
-                ok:false,
-                message: 'An error occurred while searching for the events',
-                errors : err
+function privateEvents(from, id, page){
+    if(from === 'enterprise'){
+        return new Promise((resolve, reject)=>{
+            Event.find({enterprise: id, event_type: 'PRIVATE'}).paginate(page, itemsPerPage, (err, events, total)=>{
+                if(err){
+                    reject('An error occurred while searching for the public events', err);
+                }
+                else {
+                    resolve({
+                        page,
+                        pages: Math.ceil(total/itemsPerPage),
+                        total,
+                        events
+                    });
+                }
             });
-        }
-
-        return res.status(200).send({
-            ok: true,
-            events
         });
-    });
+    }
+    else if(from === 'user' ){
+        return new Promise((resolve, reject)=>{
+            Assistants.find({user: id, event_type: 'PRIVATE'})
+                .populate('event')
+                .paginate(page, itemsPerPage, (err, events, total)=>{
+                if(err){
+                    reject('An error occurred while searching for the public events', err);
+                }
+                else {
+                    resolve({
+                        page,
+                        pages: Math.ceil(total/itemsPerPage),
+                        total,
+                        events
+                    });
+                }
+            });
+        });
+    }
+}
+
+
+function publicEvents(from, id, page){
+
+    if(from === 'enterprise'){
+        return new Promise((resolve, reject)=>{
+            Event.find({enterprise: id, event_type: 'PUBLIC'}).paginate(page, itemsPerPage, (err, events, total)=>{
+                if(err){
+                    reject('An error occurred while searching for the public events', err);
+                }
+                else {
+                    resolve({
+                        page,
+                        pages: Math.ceil(total/itemsPerPage),
+                        total,
+                        events
+                    });
+                }
+            });
+        });
+    }
+    else if(from === 'user'){
+        return new Promise((resolve, reject)=>{
+            Assistants.find({user: id, event_type: 'PUBLIC'})
+                .populate('event')
+                .paginate(page, itemsPerPage, (err, events, total)=>{
+                    if(err){
+                        reject('An error occurred while searching for the public events', err);
+                    }
+                    else {
+                        resolve({
+                            page,
+                            pages: Math.ceil(total/itemsPerPage),
+                            total,
+                            events
+                        });
+                    }
+                });
+        });
+    }
 }
 
 
@@ -88,6 +200,7 @@ function newEvent(req, res){
 }
 
 module.exports = {
-    privateEvents_Enterprise,
-    newEvent
+    newEvent,
+    eventsEnterprise,
+    eventsUser
 };

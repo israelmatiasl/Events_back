@@ -8,5 +8,7 @@ const check = require('../middlewares/check');
 const api = express.Router();
 
 api.post('/', [auth.tokenEnterpriseAuth, check.enterpriseCheck], eventController.newEvent);
+api.get('/enterprise', auth.tokenEnterpriseAuth, eventController.eventsEnterprise);
+api.get('/user', auth.tokenUserAuth, eventController.eventsUser);
 
 module.exports = api;
