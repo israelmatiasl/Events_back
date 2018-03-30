@@ -82,6 +82,47 @@ function eventsUser(req, res){
 }
 
 
+//=====================================================
+// CREATE NEW EVENT (ENTERPRISE) ======================
+//=====================================================
+function newEvent(req, res){
+
+    const params = req.body;
+    const enterprise = req.enterprise; // obtained from token
+
+    var event = new Event({
+        enterprise: enterprise._id,
+        event_name: params.event_name,
+        event_type: params.event_type,
+        begin_date: params.begin_date,
+        end_date: params.end_date,
+        location: params.location,
+        capacity: null,
+        price: params.price,
+        updated_at: null,
+    });
+
+    event.save((err, eventStored)=>{
+        if(err){
+            return res.status(500).send({
+                ok:false,
+                message: 'An error occurred while trying to create the event',
+                errors : err
+            });
+        }
+
+        return res.status(201).send({
+            ok:true,
+            event : eventStored
+        });
+    });
+}
+
+
+
+//=====================================================
+// FUNCTIONS ==========================================
+//=====================================================
 function privateEvents(from, id, page){
     if(from === 'enterprise'){
         return new Promise((resolve, reject)=>{
@@ -162,42 +203,6 @@ function publicEvents(from, id, page){
     }
 }
 
-
-//=====================================================
-// CREATE NEW EVENT (ENTERPRISE) ======================
-//=====================================================
-function newEvent(req, res){
-
-    const params = req.body;
-    const enterprise = req.enterprise; // obtained from token
-
-    var event = new Event({
-        enterprise: enterprise._id,
-        event_name: params.event_name,
-        event_type: params.event_type,
-        begin_date: params.begin_date,
-        end_date: params.end_date,
-        location: params.location,
-        capacity: null,
-        price: params.price,
-        updated_at: null,
-    });
-
-    event.save((err, eventStored)=>{
-        if(err){
-            return res.status(500).send({
-                ok:false,
-                message: 'An error occurred while trying to create the event',
-                errors : err
-            });
-        }
-
-        return res.status(201).send({
-            ok:true,
-            event : eventStored
-        });
-    });
-}
 
 module.exports = {
     newEvent,

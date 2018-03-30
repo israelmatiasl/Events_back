@@ -10,6 +10,7 @@ const validStatus = {
 
 var orderEnterpriseSchema = new Schema({
     type: { type: String, required: true, default: 'ENTERPRISE'},
+    enterprise: { type: Schema.Types.ObjectId, ref: 'Enterprise', required: [true,'enterprise is necessary'] },
     event: { type: Schema.Types.ObjectId, ref: 'Event', required: [true,'event is necessary'] },
     create_at: { type: Date, required: true, default: Date.now },
     status: { type: String, required: true, default:'NOT_CONFIRMED', enum: validStatus },
