@@ -45,6 +45,7 @@ function loginUser(req, res){
             return res.status(200).send({
                 ok:true,
                 user: foundUser,
+				check: foundUser.check,
                 token
             });
         }

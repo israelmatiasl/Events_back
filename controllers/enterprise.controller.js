@@ -51,6 +51,7 @@ function loginEnterprise(req, res){
             return res.status(200).send({
                 ok:true,
                 enterprise: foundEnterprise,
+				check: foundEnterprise.check,
                 token
             });
         }
